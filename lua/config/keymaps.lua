@@ -35,7 +35,9 @@ map("i", "jj", "<esc>", options)
 map("n", "J", "8j", options)
 map("n", "K", "8k", options)
 map("v", "H", "g^", options)
+map("n", "H", "g^", options)
 map("v", "L", "g$", options)
+map("n", "L", "g$", options)
 
 -- replace the highlighted text with content from clip board.
 map("n", "d", '"zd', options)
@@ -173,8 +175,8 @@ map("n", "<leader><leader>j", "<C-W>s", { desc = "Split window below", remap = t
 map("n", "<leader><leader>l", "<C-W>v", { desc = "Split window right", remap = true })
 
 -- tabs
-map("n", "<leader><leader>1", "<cmd>tablast<cr>", { desc = "Last Tab" })
-map("n", "<leader><leader>0", "<cmd>tabfirst<cr>", { desc = "First Tab" })
+map("n", "<leader><leader>0", "<cmd>tablast<cr>", { desc = "Last Tab" })
+map("n", "<leader><leader>1", "<cmd>tabfirst<cr>", { desc = "First Tab" })
 map("n", "ti", "<cmd>tabnew<cr>", { desc = "New Tab" })
 map("n", "+", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "_", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
