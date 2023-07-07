@@ -1,5 +1,36 @@
 return {
   {
+    "hrsh7th/nvim-cmp",
+    -- load cmp on InsertEnter
+    event = "InsertEnter",
+    -- these dependencies will only be loaded when cmp loads
+    -- dependencies are always lazy-loaded unless specified otherwise
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+    },
+    config = function()
+      -- ...
+    end,
+  },
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = { "hrsh7th/cmp-emoji" },
+    --@param opts cmp.ConfigSchema
+    opts = function(_, opts)
+      local cmp = require("cmp")
+      opts.sources = cmp.config.sources(vim.list_extend(opts.sources, {
+        { name = "luasnip" },
+        { name = "nvim_lsp" },
+        { name = "path", max_item_count = 4 },
+        { name = "buffer", max_item_count = 4, keyword_length = 5 },
+        { name = "nvim_lua" },
+        { name = "nvim_lsp_signature_hel" },
+        { name = "emoji" },
+      }))
+    end,
+  },
+  {
     "neovim/nvim-lspconfig",
     ---@class PluginLspOpts
     opts = {
@@ -279,21 +310,21 @@ return {
       --keys[#keys + 1] = { "K", "<cmd>echo 'hello'<cr>" }
       -- disable a keymap
       keys[#keys + 1] = { "K", false }
-      keys[#keys + 1] = { "gd", false }
-      keys[#keys + 1] = { "gr", false }
-      keys[#keys + 1] = { "gD", false }
-      keys[#keys + 1] = { "gI", false }
-      keys[#keys + 1] = { "gy", false }
+      keys[#keys + 2] = { "gd", false }
+      keys[#keys + 3] = { "gr", false }
+      keys[#keys + 4] = { "gD", false }
+      keys[#keys + 5] = { "gI", false }
+      keys[#keys + 6] = { "gy", false }
       -- add a keymap
-      keys[#keys + 1] = { "<leader>ov", "<cmd>lua vim.lsp.buf.hover()<CR>", desc = "Hover", opts }
+      keys[#keys + 7] = { "<leader>ov", "<cmd>lua vim.lsp.buf.hover()<CR>", desc = "Hover", opts }
 
-      keys[#keys + 1] =
+      keys[#keys + 8] =
         { "<leader>ip", "<cmd>lua vim.lsp.buf.implementation()<CR>", desc = "Goto implementation", opts }
-      keys[#keys + 1] = { "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", desc = "Rename variable", opts }
-      keys[#keys + 1] = { "<leader>rf", "<cmd>lua vim.lsp.buf.references()<CR>", desc = "Goto reference", opts }
-      keys[#keys + 1] = { "<leader>df", "<cmd>lua vim.lsp.buf.definition()<CR>", desc = "Goto definition", opts }
-      keys[#keys + 1] = { "<leader>dc", "<cmd>lua vim.lsp.buf.declaration()<CR>", desc = "Goto declaration", opts }
-      keys[#keys + 1] =
+      keys[#keys + 9] = { "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", desc = "Rename variable", opts }
+      keys[#keys + 10] = { "<leader>rf", "<cmd>lua vim.lsp.buf.references()<CR>", desc = "Goto reference", opts }
+      keys[#keys + 11] = { "<leader>df", "<cmd>lua vim.lsp.buf.definition()<CR>", desc = "Goto definition", opts }
+      keys[#keys + 12] = { "<leader>dc", "<cmd>lua vim.lsp.buf.declaration()<CR>", desc = "Goto declaration", opts }
+      keys[#keys + 13] =
         { "<leader>dt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", desc = "Goto type definition", opts }
     end,
   },
