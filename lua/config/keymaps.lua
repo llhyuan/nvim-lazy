@@ -54,10 +54,10 @@ map("n", "<leader>k", "<C-w>k", { desc = "Go to upper window", remap = true })
 map("n", "<leader>l", "<C-w>l", { desc = "Go to right window", remap = true })
 
 -- Resize window using <ctrl> arrow keys
-map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
-map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
-map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
-map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+map("n", "<Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
+map("n", "<Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
+map("n", "<Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
+map("n", "<Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
 -- Move Lines
 map("n", "∆", "<cmd>m .+1<cr>==", { desc = "Move down" })
@@ -152,12 +152,8 @@ if vim.fn.has("nvim-0.9.0") == 1 then
   map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
 end
 
--- floating terminal
-local lazyterm = function() Util.float_term(nil, { cwd = Util.get_root() }) end
-map("n", "<leader>t", lazyterm, { desc = "Terminal (root dir)" })
-map("n", "<leader>T", function() Util.float_term() end, { desc = "Terminal (cwd)" })
-map("n", "<c-/>", lazyterm, { desc = "Terminal (root dir)" })
-map("n", "<c-_>", lazyterm, { desc = "which_key_ignore" })
+-- terminal
+map("n", "<leader>t", ":ToggleTerm<cr>",{desc="Toggle terminal"})
 
 -- Terminal Mappings
 map("t", "<esc>", "<c-\\><c-n>", { desc = "Enter Normal Mode" })
@@ -166,7 +162,6 @@ map("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Go to lower window" })
 map("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Go to upper window" })
 map("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Go to right window" })
 map("t", "<C-t>", "<cmd>close<cr>", { desc = "Hide Terminal" })
-map("t", "<c-_>", "<cmd>close<cr>", { desc = "which_key_ignore" })
 
 -- windows
 map("n", "<leader>ww", "<C-W>p", { desc = "Other window", remap = true })
@@ -180,3 +175,21 @@ map("n", "<leader><leader>1", "<cmd>tabfirst<cr>", { desc = "First Tab" })
 map("n", "ti", "<cmd>tabnew<cr>", { desc = "New Tab" })
 map("n", "+", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "_", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+
+-- keymaps for lsp
+map("n", "<leader>dc", "<cmd>lua vim.lsp.buf.declaration()<CR>", options)
+map("n", "<leader>df", "<cmd>lua vim.lsp.buf.definition()<CR>", options)
+map( "n", "<leader>dt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", options)
+map("n", "<leader>ov", "<cmd>lua vim.lsp.buf.hover()<CR>", options)
+map("n", "<leader>ip", "<cmd>lua vim.lsp.buf.implementation()<CR>", options)
+map("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", options)
+map("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", options)
+map("n", "<leader>rf", "<cmd>lua vim.lsp.buf.references()<CR>", options)
+map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", options)
+
+-- Diagnostics
+map("n", "<leader>dg", "<cmd>lua vim.diagnostic.open_float()<CR>", options)
+map("n", "<leader>dk", '<cmd>lua vim.diagnostic.goto_prev({ border = "rounded" })<CR>', options)
+map("n", "<leader>dj", '<cmd>lua vim.diagnostic.goto_next({ border = "rounded" })<CR>', options)
+
+-- Debugging

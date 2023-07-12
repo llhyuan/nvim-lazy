@@ -1,157 +1,105 @@
 return {
   {
-    "hrsh7th/nvim-cmp",
-    -- load cmp on InsertEnter
-    event = "InsertEnter",
-    -- these dependencies will only be loaded when cmp loads
-    -- dependencies are always lazy-loaded unless specified otherwise
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-    },
-    config = function()
-      -- ...
-    end,
-  },
-  {
-    "hrsh7th/nvim-cmp",
-    dependencies = { "hrsh7th/cmp-emoji" },
-    --@param opts cmp.ConfigSchema
-    opts = function(_, opts)
-      local cmp = require("cmp")
-      opts.sources = cmp.config.sources(vim.list_extend(opts.sources, {
-        { name = "luasnip" },
-        { name = "nvim_lsp" },
-        { name = "path", max_item_count = 4 },
-        { name = "buffer", max_item_count = 4, keyword_length = 5 },
-        { name = "nvim_lua" },
-        { name = "nvim_lsp_signature_hel" },
-        { name = "emoji" },
-      }))
-    end,
-  },
-  {
     "neovim/nvim-lspconfig",
-    ---@class PluginLspOpts
+    -- other settings removed for brevity
     opts = {
       ---@type lspconfig.options
       servers = {
-        -- pyright will be automatically installed with mason and loaded with lspconfig
-        pyright = {},
-        eslint = {},
+        eslint = {
+          settings = {
+            -- helps eslint find the eslintrc when it's placed in a subfolder instead of the cwd root
+            workingDirectory = { mode = "auto" },
+          },
+        },
       },
       setup = {
         eslint = function()
-          require("lazyvim.util").on_attach(function(client)
-            if client.name == "eslint" then
-              client.server_capabilities.documentFormattingProvider = true
-            elseif client.name == "tsserver" then
-              client.server_capabilities.documentFormattingProvider = false
-            end
-          end)
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            callback = function(event)
+              if not require("lazyvim.plugins.lsp.format").enabled() then
+                -- exit early if autoformat is not enabled
+                return
+              end
+
+              local client = vim.lsp.get_active_clients({ bufnr = event.buf, name = "eslint" })[1]
+              if client then
+                local diag = vim.diagnostic.get(event.buf, { namespace = vim.lsp.diagnostic.get_namespace(client.id) })
+                if #diag > 0 then
+                  vim.cmd("EslintFixAll")
+                end
+              end
+            end,
+          })
         end,
       },
     },
   },
 
-  -- add tsserver and setup with typescript.nvim instead of lspconfig
   {
     "neovim/nvim-lspconfig",
-    dependencies = {
-      "jose-elias-alvarez/typescript.nvim",
-      init = function()
-        require("lazyvim.util").on_attach(function(_, buffer)
-          -- stylua: ignore
-          vim.keymap.set( "n", "<leader>co", "TypescriptOrganizeImports", { buffer = buffer, desc = "Organize Imports" })
-          vim.keymap.set("n", "<leader>cR", "TypescriptRenameFile", { desc = "Rename File", buffer = buffer })
-        end)
-      end,
-    },
-    ---@class PluginLspOpts
     opts = {
-      ---@type lspconfig.options
       servers = {
-        -- tsserver will be automatically installed with mason and loaded with lspconfig
-        tsserver = {},
-      },
-      -- you can do any additional lsp server setup here
-      -- return true if you don't want this server to be setup with lspconfig
-      ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>
-      setup = {
-        -- example to setup with typescript.nvim
-        tsserver = function(_, opts)
-          require("typescript").setup({ server = opts })
-          return true
-        end,
-        -- Specify * to use this function as a fallback for any server
-        -- ["*"] = function(server, opts) end,
-      },
-    },
-  },
-}, {
-  "neovim/nvim-lspconfig",
-  opts = {
-    servers = {
-      gopls = {
-        settings = {
-          gopls = {
-            gofumpt = true,
-            codelenses = {
-              gc_details = false,
-              generate = true,
-              regenerate_cgo = true,
-              run_govulncheck = true,
-              test = true,
-              tidy = true,
-              upgrade_dependency = true,
-              vendor = true,
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              codelenses = {
+                gc_details = false,
+                generate = true,
+                regenerate_cgo = true,
+                run_govulncheck = true,
+                test = true,
+                tidy = true,
+                upgrade_dependency = true,
+                vendor = true,
+              },
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              },
+              analyses = {
+                fieldalignment = true,
+                nilness = true,
+                unusedparams = true,
+                unusedwrite = true,
+                useany = true,
+              },
+              usePlaceholders = true,
+              completeUnimported = true,
+              staticcheck = true,
+              directoryFilters = { "-.git", "-.vscode", "-.idea", "-.vscode-test", "-node_modules" },
+              semanticTokens = true,
             },
-            hints = {
-              assignVariableTypes = true,
-              compositeLiteralFields = true,
-              compositeLiteralTypes = true,
-              constantValues = true,
-              functionTypeParameters = true,
-              parameterNames = true,
-              rangeVariableTypes = true,
-            },
-            analyses = {
-              fieldalignment = true,
-              nilness = true,
-              unusedparams = true,
-              unusedwrite = true,
-              useany = true,
-            },
-            usePlaceholders = true,
-            completeUnimported = true,
-            staticcheck = true,
-            directoryFilters = { "-.git", "-.vscode", "-.idea", "-.vscode-test", "-node_modules" },
-            semanticTokens = true,
           },
         },
       },
-    },
-    setup = {
-      gopls = function(_, opts)
-        -- workaround for gopls not supporting semanticTokensProvider
-        -- https://github.com/golang/go/issues/54531#issuecomment-1464982242
-        require("lazyvim.util").on_attach(function(client, _)
-          if client.name == "gopls" then
-            if not client.server_capabilities.semanticTokensProvider then
-              local semantic = client.config.capabilities.textDocument.semanticTokens
-              client.server_capabilities.semanticTokensProvider = {
-                full = true,
-                legend = {
-                  tokenTypes = semantic.tokenTypes,
-                  tokenModifiers = semantic.tokenModifiers,
-                },
-                range = true,
-              }
+      setup = {
+        gopls = function(_, opts)
+          -- workaround for gopls not supporting semanticTokensProvider
+          -- https://github.com/golang/go/issues/54531#issuecomment-1464982242
+          require("lazyvim.util").on_attach(function(client, _)
+            if client.name == "gopls" then
+              if not client.server_capabilities.semanticTokensProvider then
+                local semantic = client.config.capabilities.textDocument.semanticTokens
+                client.server_capabilities.semanticTokensProvider = {
+                  full = true,
+                  legend = {
+                    tokenTypes = semantic.tokenTypes,
+                    tokenModifiers = semantic.tokenModifiers,
+                  },
+                  range = true,
+                }
+              end
             end
-          end
-        end)
-        -- end workaround
-      end,
+          end)
+          -- end workaround
+        end,
+      },
     },
   },
   {
@@ -300,32 +248,5 @@ return {
         end,
       },
     },
-  },
-  {
-    "neovim/nvim-lspconfig",
-    init = function()
-      local opts = { remap = false, silent = true }
-      local keys = require("lazyvim.plugins.lsp.keymaps").get()
-      -- change a keymap
-      --keys[#keys + 1] = { "K", "<cmd>echo 'hello'<cr>" }
-      -- disable a keymap
-      keys[#keys + 1] = { "K", false }
-      keys[#keys + 2] = { "gd", false }
-      keys[#keys + 3] = { "gr", false }
-      keys[#keys + 4] = { "gD", false }
-      keys[#keys + 5] = { "gI", false }
-      keys[#keys + 6] = { "gy", false }
-      -- add a keymap
-      keys[#keys + 7] = { "<leader>ov", "<cmd>lua vim.lsp.buf.hover()<CR>", desc = "Hover", opts }
-
-      keys[#keys + 8] =
-        { "<leader>ip", "<cmd>lua vim.lsp.buf.implementation()<CR>", desc = "Goto implementation", opts }
-      keys[#keys + 9] = { "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", desc = "Rename variable", opts }
-      keys[#keys + 10] = { "<leader>rf", "<cmd>lua vim.lsp.buf.references()<CR>", desc = "Goto reference", opts }
-      keys[#keys + 11] = { "<leader>df", "<cmd>lua vim.lsp.buf.definition()<CR>", desc = "Goto definition", opts }
-      keys[#keys + 12] = { "<leader>dc", "<cmd>lua vim.lsp.buf.declaration()<CR>", desc = "Goto declaration", opts }
-      keys[#keys + 13] =
-        { "<leader>dt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", desc = "Goto type definition", opts }
-    end,
   },
 }
